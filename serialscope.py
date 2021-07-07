@@ -54,8 +54,6 @@ class SerialScope:
                     data = self._parse_msg(msg.decode('utf-8'))
                     self.add_data(data)
                     self.update_plot()
-                    if len(self._buffer) > self.serial_log_limit:
-                        self.flush_serial_log()
         except SerialException:
             print("Could not open that serial port (%s) or baud (%s)", self.serial_port, self.serial_baud)
             exit(2)
@@ -63,12 +61,12 @@ class SerialScope:
     def _parse_msg(self, msg) -> list:
         # FIXME: manage this more generically
         parts = msg.split(":")
-        data = parts[1].split(",")
+        data = parts[1].replace("\r\n","").split(",")
         return data
 
     def add_data(self, data):
-        new_df = pd.DataFrame(data, index=self._headers)
-        pd.concat([self._buffer, new_df])
+        new_df = pd.DataFrame([data], columns=self._headers)
+        self._buffer = pd.concat([self._buffer, new_df])
 
     def update_plot(self):
         X = self._buffer[self._x_axis_header]
