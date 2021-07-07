@@ -24,19 +24,19 @@ class SerialScope:
         self._data_headers = parsed_headers[1:]
         self._buffer = pd.DataFrame(columns=parsed_headers)
         
-        # plt.ion()
+        plt.ion()
         if len(self._data_headers) <= 3:
             rows, cols = 1, len(self._data_headers)
         else:
-            div, rm = divmod(len(self._data_headers), 3)
-            rows, cols = div + rm, 3
+            rows, cols = int(ceil(len(self._data_headers)/3)), 3
         self.fig, self.axes = plt.subplots(rows, cols)
         plots = [p.plot([],[])[0] for p in self.axes.flat]
         self._header_plot_map = {h:i for h,i in zip(self._data_headers, plots)}
         plt.show()
 
     def start_monitoring_serial(self):
-        self.serial_thread = threading.Thread(target=self._monitor_serial).start()
+        # self.serial_thread = threading.Thread(target=self._monitor_serial).start()
+        self._monitor_serial()
         self._monitoring_serial = True
         
     def stop_monitoring_serial(self):
@@ -73,11 +73,11 @@ class SerialScope:
     def update_plot(self):
         X = self._buffer[self._x_axis_header]
         for header, values in self._buffer[self._data_headers].iteritems():
-            # plt.plot(X, values.values(), label=header)
             axis = self._header_plot_map[header]
             axis.set_data(X, values)
-        plt.draw()
-        # plt.pause(0.01)
+            plt.draw()
+        plt.pause(0.01)
+        plt.show()
 
 
 def parse_opts(args):
