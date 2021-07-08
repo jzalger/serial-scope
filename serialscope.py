@@ -2,10 +2,10 @@
 import getopt
 from numpy import ceil, mod
 import serial
-import threading
 import pandas as pd
 import pylab as plt
 from sys import argv, exit
+from numpy import float64
 from serial.serialutil import SerialException
 
 
@@ -22,7 +22,7 @@ class SerialScope:
         self._x_axis_header = parsed_headers[0]
         self._headers = parsed_headers
         self._data_headers = parsed_headers[1:]
-        self._buffer = pd.DataFrame(columns=parsed_headers)
+        self._buffer = pd.DataFrame(columns=parsed_headers, dtype=float64)
         
         plt.ion()
         if len(self._data_headers) <= 3:
@@ -35,7 +35,6 @@ class SerialScope:
         plt.show()
 
     def start_monitoring_serial(self):
-        # self.serial_thread = threading.Thread(target=self._monitor_serial).start()
         self._monitor_serial()
         self._monitoring_serial = True
         
@@ -65,7 +64,7 @@ class SerialScope:
         return data
 
     def add_data(self, data):
-        new_df = pd.DataFrame([data], columns=self._headers)
+        new_df = pd.DataFrame([data], columns=self._headers, dtype=float64)
         self._buffer = pd.concat([self._buffer, new_df])
 
     def update_plot(self):
